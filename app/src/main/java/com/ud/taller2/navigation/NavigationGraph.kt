@@ -6,13 +6,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ud.taller2.ui.createroom.CreateRoomScreen
 import com.ud.taller2.ui.game.GameScreen
 import com.ud.taller2.ui.gameover.GameOverScreen
 import com.ud.taller2.ui.home.HomeScreen
+import com.ud.taller2.ui.joinroom.JoinRoomScreen
 import com.ud.taller2.ui.victory.VictoryScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
+    object CreateRoom : Screen("create_room")
+    object JoinRoom : Screen("join_room")
     object Game : Screen("game")
     object Victory : Screen("victory/{finalMoney}/{turns}") {
         fun createRoute(finalMoney: Int, turns: Int) = "victory/$finalMoney/$turns"
@@ -33,6 +37,16 @@ fun NavigationGraph() {
         // Home Screen
         composable(Screen.Home.route) {
             HomeScreen(navController = navController)
+        }
+
+        // Create Room Screen
+        composable(Screen.CreateRoom.route) {
+            CreateRoomScreen(navController = navController)
+        }
+
+        // Join Room Screen
+        composable(Screen.JoinRoom.route) {
+            JoinRoomScreen(navController = navController)
         }
 
         // Game Screen
