@@ -18,14 +18,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ud.taller2.R
 import com.ud.taller2.navigation.Screen
-import com.ud.taller2.utils.BackgroundMusic
 import com.ud.taller2.utils.SoundManager
 import kotlinx.coroutines.delay
 
@@ -35,36 +33,25 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
 ) {
     val context = LocalContext.current
-
-    // Sound managers
     val soundManager = remember { SoundManager(context) }
-    val backgroundMusic = remember { BackgroundMusic(context) }
 
-    // Animation state
     var buttonsVisible by remember { mutableStateOf(false) }
 
-    // Initialize sounds and animations
     LaunchedEffect(Unit) {
         soundManager.initSounds()
-        backgroundMusic.start()
-
-        // Animation delay
         delay(500)
         buttonsVisible = true
     }
 
-    // Cleanup on exit
     DisposableEffect(Unit) {
         onDispose {
             soundManager.release()
-            backgroundMusic.stop()
         }
     }
 
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Image from res/drawable (NO BLUR)
         Image(
             painter = painterResource(R.drawable.background_home),
             contentDescription = "Background",
@@ -72,7 +59,6 @@ fun HomeScreen(
             contentScale = ContentScale.Crop
         )
 
-        // Dark gradient overlay for better button contrast
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -87,7 +73,6 @@ fun HomeScreen(
                 )
         )
 
-        // Main Content - Buttons at bottom
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -95,7 +80,6 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Buttons Section with animation
             AnimatedVisibility(
                 visible = buttonsVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })
@@ -105,7 +89,6 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    // Create Room Button
                     Button(
                         onClick = {
                             soundManager.playClickSound()
@@ -124,10 +107,7 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(
-                                text = "🏦",
-                                fontSize = 28.sp
-                            )
+                            Text(text = "🏦", fontSize = 28.sp)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "CREATE ROOM",
@@ -138,7 +118,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Join Room Button
                     Button(
                         onClick = {
                             soundManager.playClickSound()
@@ -157,10 +136,7 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(
-                                text = "🔑",
-                                fontSize = 28.sp
-                            )
+                            Text(text = "🔑", fontSize = 28.sp)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "JOIN ROOM",
@@ -173,11 +149,9 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Exit Button
                     OutlinedButton(
                         onClick = {
                             soundManager.playClickSound()
-                            backgroundMusic.stop()
                             (context as? Activity)?.finish()
                         },
                         modifier = Modifier
@@ -187,9 +161,7 @@ fun HomeScreen(
                             contentColor = Color.White.copy(alpha = 0.8f)
                         ),
                         shape = RoundedCornerShape(25.dp),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            width = 2.dp
-                        )
+                        border = ButtonDefaults.outlinedButtonBorder.copy(width = 2.dp)
                     ) {
                         Text(
                             text = "EXIT",

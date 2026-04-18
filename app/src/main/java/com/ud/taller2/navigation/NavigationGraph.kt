@@ -11,13 +11,19 @@ import com.ud.taller2.ui.game.GameScreen
 import com.ud.taller2.ui.gameover.GameOverScreen
 import com.ud.taller2.ui.home.HomeScreen
 import com.ud.taller2.ui.joinroom.JoinRoomScreen
+import com.ud.taller2.ui.lobby.LobbyScreen
 import com.ud.taller2.ui.victory.VictoryScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object CreateRoom : Screen("create_room")
     object JoinRoom : Screen("join_room")
-    object Game : Screen("game")
+    object Lobby : Screen("lobby/{roomCode}/{playerId}") {
+        fun createRoute(roomCode: String, playerId: String) = "lobby/$roomCode/$playerId"
+    }
+    object Game : Screen("game/{roomCode}/{playerId}") {
+        fun createRoute(roomCode: String, playerId: String) = "game/$roomCode/$playerId"
+    }
     object Victory : Screen("victory/{finalMoney}/{turns}") {
         fun createRoute(finalMoney: Int, turns: Int) = "victory/$finalMoney/$turns"
     }
@@ -49,8 +55,33 @@ fun NavigationGraph() {
             JoinRoomScreen(navController = navController)
         }
 
+        // Lobby Screen
+        composable(
+            route = Screen.Lobby.route,
+            arguments = listOf(
+                navArgument("roomCode") { type = NavType.StringType },
+                navArgument("playerId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val roomCode = backStackEntry.arguments?.getString("roomCode") ?: ""
+            val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
+            LobbyScreen(
+                navController = navController,
+                roomCode = roomCode,
+                playerId = playerId
+            )
+        }
+
         // Game Screen
-        composable(Screen.Game.route) {
+        composable(
+            route = Screen.Game.route,
+            arguments = listOf(
+                navArgument("roomCode") { type = NavType.StringType },
+                navArgument("playerId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val roomCode = backStackEntry.arguments?.getString("roomCode") ?: ""
+            val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
             GameScreen(navController = navController)
         }
 

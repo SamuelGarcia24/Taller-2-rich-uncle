@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -72,4 +73,10 @@ dependencies {
     // Animation
     implementation("androidx.compose.animation:animation:1.6.0")
     implementation("androidx.compose.animation:animation-core:1.6.0")
+
+    // Firebase BOM (Bill of Materials) - Importante para versiones compatibles
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+
+    // Firebase Realtime Database
+    implementation("com.google.firebase:firebase-database-ktx")
 }
