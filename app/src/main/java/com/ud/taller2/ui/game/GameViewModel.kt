@@ -1,6 +1,7 @@
 package com.ud.taller2.ui.game
 
 import androidx.lifecycle.ViewModel
+import com.ud.taller2.data.model.getRandomEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,13 +58,11 @@ class GameViewModel : ViewModel() {
             var finalBalance = balanceAfterAction
             var eventMsg = ""
             if (Random.nextFloat() < 0.20f) {
-                val eventValue = Random.nextInt(-300, 301)
-                finalBalance += eventValue
-                eventMsg = if (eventValue >= 0) {
-                    " | Random Event: Lucky day! +$$eventValue"
-                } else {
-                    " | Random Event: Unexpected bill! $$eventValue"
-                }
+                // AQUÍ LLAMAMOS A TU FUNCIÓN PARA QUE DEJE DE MARCAR ERROR
+                val randomEvent = getRandomEvents().random()
+
+                finalBalance += randomEvent.amount
+                eventMsg = " | Event: ${randomEvent.description} (${if(randomEvent.amount >= 0) "+" else ""}${randomEvent.amount})"
             }
 
             // 3. Evaluate Win/Loss conditions immediately
