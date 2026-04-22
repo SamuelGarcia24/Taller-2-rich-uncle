@@ -27,10 +27,17 @@ import com.ud.taller2.navigation.Screen
 @Composable
 fun GameScreen(
     navController: NavController,
+    roomCode: String,
+    playerId: String,
     viewModel: GameViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    // Initialize game with room info
+    LaunchedEffect(roomCode, playerId) {
+        viewModel.initGame(roomCode, playerId)
+    }
 
     // Observe game status to navigate to Victory or Game Over screens
     LaunchedEffect(uiState.status) {

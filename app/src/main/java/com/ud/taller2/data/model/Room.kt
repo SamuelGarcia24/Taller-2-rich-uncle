@@ -1,7 +1,6 @@
 package com.ud.taller2.data.model
 
 import com.google.firebase.database.IgnoreExtraProperties
-import com.google.firebase.database.PropertyName
 
 @IgnoreExtraProperties
 data class Room(
@@ -19,8 +18,6 @@ data class Room(
 data class PlayerRoom(
     val name: String = "",
     val money: Int = 1000,
-    @get:PropertyName("isReady") @set:PropertyName("isReady")
-    var isReady: Boolean = false,
-    @get:PropertyName("isHost") @set:PropertyName("isHost")
-    var isHost: Boolean = false
+    var ready: Boolean = false,
+    var host: Boolean = false
 )

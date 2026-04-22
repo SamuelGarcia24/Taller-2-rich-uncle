@@ -62,10 +62,10 @@ fun LobbyScreen(
     val playersMap = room?.players ?: emptyMap()
     val isHost = room?.hostId == playerId
     val currentPlayer = playersMap[playerId]
-    val isReady = currentPlayer?.isReady ?: false
+    val isReady = currentPlayer?.ready ?: false
     
     val playersList = playersMap.values.toList()
-    val allPlayersReady = playersList.isNotEmpty() && playersList.all { it.isReady }
+    val allPlayersReady = playersList.isNotEmpty() && playersList.all { it.ready }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -180,14 +180,14 @@ fun PlayerCard(player: PlayerRoom, isHost: Boolean, isCurrentPlayer: Boolean) {
         )
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (player.isReady) Color.Green else Color.Red))
+            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (player.ready) Color.Green else Color.Red))
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(player.name + (if (isCurrentPlayer) " (You)" else ""), color = Color.White, fontWeight = FontWeight.Bold)
                 if (isHost) Text("Host", color = Color(0xFFFFD700), fontSize = 12.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(if (player.isReady) "READY" else "NOT READY", color = if (player.isReady) Color.Green else Color.Red)
+            Text(if (player.ready) "READY" else "NOT READY", color = if (player.ready) Color.Green else Color.Red)
         }
     }
 }

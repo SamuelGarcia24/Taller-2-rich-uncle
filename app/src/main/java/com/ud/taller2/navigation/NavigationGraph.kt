@@ -82,7 +82,11 @@ fun NavigationGraph() {
         ) { backStackEntry ->
             val roomCode = backStackEntry.arguments?.getString("roomCode") ?: ""
             val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
-            GameScreen(navController = navController)
+            GameScreen(
+                navController = navController,
+                roomCode = roomCode,
+                playerId = playerId
+            )
         }
 
         // Victory Screen
