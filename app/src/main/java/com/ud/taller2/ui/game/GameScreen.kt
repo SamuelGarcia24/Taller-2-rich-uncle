@@ -79,6 +79,16 @@ fun GameScreen(
                     Text("Turn: ${uiState.turn}", fontWeight = FontWeight.Bold)
                     Text("Target: $${uiState.target}", color = Color.Gray)
                 }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = uiState.activePlayerName,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (uiState.isMyTurn) Color(0xFF4CAF50) else Color.Gray
+                )
+
                 Text(
                     text = "$${uiState.balance}",
                     fontSize = 48.sp,
@@ -112,7 +122,8 @@ fun GameScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val enabled = uiState.status == GameStatus.PLAYING
+            // Actions only enabled if it's the player's turn and the game is active
+            val enabled = uiState.status == GameStatus.PLAYING && uiState.isMyTurn
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -151,7 +162,11 @@ fun GameScreen(
 
             // --- Footer ---
             OutlinedButton(
-                onClick = { context.findActivity()?.finish() },
+                onClick = { 
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
