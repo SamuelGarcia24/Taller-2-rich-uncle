@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+
 class GameViewModel : ViewModel() {
 
     private val repository = FirebaseRepository()
@@ -24,55 +25,61 @@ class GameViewModel : ViewModel() {
         currentRoomCode = roomCode
         currentPlayerId = playerId
         
-        // Listen to room status to detect if someone else won
         viewModelScope.launch {
             repository.listenToRoom(roomCode).collect { room ->
-                if (room?.status == "finished") {
-                    // If the room is finished but we haven't won, we lost
-                    if (_uiState.value.status == GameStatus.PLAYING) {
-                        _uiState.update { it.copy(status = GameStatus.LOST, eventLog = "Game Over! Another player reached the goal first.") }
-                    }
+                if (room == null) return@collect
+
+                val isMyTurn = room.activePlayerId == currentPlayerId
+                val activeName = room.players[room.activePlayerId]?.name ?: "Someone"
+                
+                _uiState.update { it.copy(
+                    isMyTurn = isMyTurn,
+                    activePlayerName = if (isMyTurn) "It's your turn!" else "Waiting for $activeName..."
+                ) }
+
+                if (room.status == "finished" && _uiState.value.status == GameStatus.PLAYING) {
+                    _uiState.update { it.copy(status = GameStatus.LOST, eventLog = "Game Over! Another player reached the goal.") }
                 }
             }
         }
     }
 
     fun onSave() {
+        if (!_uiState.value.isMyTurn) return
         executeTurn { currentBalance ->
             val interest = (currentBalance * 0.05).toInt()
             val newBalance = currentBalance + interest
-            Pair(newBalance, "Action: Saved money and earned 5% interest (+$interest).")
+            Pair(newBalance, "Action: Saved money (+$interest).")
         }
     }
 
     fun onInvest() {
+        if (!_uiState.value.isMyTurn) return
         executeTurn { currentBalance ->
             val investmentCost = 200
             if (currentBalance < investmentCost) {
-                Pair(currentBalance, "Action: Not enough balance to invest $200.")
+                Pair(currentBalance, "Action: Not enough balance to invest.")
             } else {
                 val win = Random.nextBoolean()
                 if (win) {
-                    val newBalance = currentBalance + 200
-                    Pair(newBalance, "Action: Invested $200 and won! Net gain +$200.")
+                    Pair(currentBalance + 200, "Action: Invested $200 and won! Net gain +$200.")
                 } else {
-                    val newBalance = currentBalance - 200
-                    Pair(newBalance, "Action: Invested $200 and lost. Net loss -$200.")
+                    Pair(currentBalance - 200, "Action: Invested $200 and lost. Net loss -$200.")
                 }
             }
         }
     }
 
     fun onSpend() {
+        if (!_uiState.value.isMyTurn) return
         executeTurn { currentBalance ->
             val spent = 150
-            val newBalance = currentBalance - spent
-            Pair(newBalance, "Action: Spent $150 on lifestyle.")
+            Pair(currentBalance - spent, "Action: Spent $150 on lifestyle.")
         }
     }
 
     private fun executeTurn(actionLogic: (Int) -> Pair<Int, String>) {
-        if (_uiState.value.status != GameStatus.PLAYING) return
+        if (_uiState.value.status != GameStatus.PLAYING || !_uiState.value.isMyTurn) return
 
         _uiState.update { currentState ->
             val (balanceAfterAction, actionMsg) = actionLogic(currentState.balance)
@@ -91,13 +98,13 @@ class GameViewModel : ViewModel() {
                 else -> GameStatus.PLAYING
             }
 
-            // Sync with Firebase
             viewModelScope.launch {
                 repository.updatePlayerMoney(currentRoomCode, currentPlayerId, finalBalance)
                 
-                // CRITICAL RULE: If I win, tell everyone the game is finished
                 if (newStatus == GameStatus.WON) {
                     repository.endGame(currentRoomCode, currentPlayerId)
+                } else {
+                    repository.passTurn(currentRoomCode, currentPlayerId)
                 }
             }
 

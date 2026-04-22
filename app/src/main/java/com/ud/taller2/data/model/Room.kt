@@ -10,6 +10,7 @@ data class Room(
     val createdAt: Long = 0L,
     val status: String = "waiting", // waiting, playing, finished
     val players: Map<String, PlayerRoom> = emptyMap(),
+    val activePlayerId: String = "", // Add this to track current player
     val currentTurn: Int = 0,
     val maxPlayers: Int = 3
 )

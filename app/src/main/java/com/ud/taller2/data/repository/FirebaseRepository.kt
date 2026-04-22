@@ -37,7 +37,8 @@ class FirebaseRepository {
                 hostId = hostId,
                 createdAt = System.currentTimeMillis(),
                 status = "waiting",
-                players = mapOf(hostId to hostPlayer)
+                players = mapOf(hostId to hostPlayer),
+                activePlayerId = hostId // Host starts the game
             )
 
             database.child("rooms").child(roomCode).setValue(room).await()
@@ -97,6 +98,22 @@ class FirebaseRepository {
 
     suspend fun startGame(roomCode: String) {
         database.child("rooms").child(roomCode).child("status").setValue("playing").await()
+    }
+
+    suspend fun passTurn(roomCode: String, currentPlayerId: String) {
+        try {
+            val snapshot = database.child("rooms").child(roomCode).get().await()
+            val room = snapshot.getValue(Room::class.java) ?: return
+            
+            val playerIds = room.players.keys.toList().sorted()
+            val currentIndex = playerIds.indexOf(currentPlayerId)
+            val nextIndex = (currentIndex + 1) % playerIds.size
+            val nextPlayerId = playerIds[nextIndex]
+            
+            database.child("rooms").child(roomCode).child("activePlayerId").setValue(nextPlayerId).await()
+        } catch (e: Exception) {
+            // Log error
+        }
     }
 
     suspend fun endGame(roomCode: String, winnerId: String) {
