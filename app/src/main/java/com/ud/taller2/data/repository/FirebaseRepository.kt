@@ -30,10 +30,11 @@ class FirebaseRepository {
     /**
      * Create a new room with a unique 6-character code
      */
-    suspend fun createRoom(hostName: String): Result<String> {
+    // In FirebaseRepository.kt
+    suspend fun createRoom(hostName: String, hostId: String): Result<String> { // Add hostId parameter
         return try {
             val roomCode = generateRoomCode()
-            val hostId = UUID.randomUUID().toString()
+            // Remove the local hostId generation line
 
             val hostPlayer = PlayerRoom(
                 name = hostName,
@@ -45,7 +46,7 @@ class FirebaseRepository {
             val room = Room(
                 roomCode = roomCode,
                 hostName = hostName,
-                hostId = hostId,
+                hostId = hostId, // Use the passed ID
                 createdAt = System.currentTimeMillis(),
                 status = "waiting",
                 players = mutableMapOf(hostId to hostPlayer)

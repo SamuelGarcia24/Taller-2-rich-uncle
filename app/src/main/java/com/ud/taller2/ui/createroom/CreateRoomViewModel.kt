@@ -21,19 +21,16 @@ class CreateRoomViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val result = repository.createRoom(playerName)
+            val playerId = UUID.randomUUID().toString() // Generate it here first
+            val result = repository.createRoom(playerName, playerId) // Pass it here
 
             result.fold(
                 onSuccess = { roomCode ->
-                    // Generate a unique player ID for the host
-                    // In a real implementation, this would come from Firebase Auth
-                    val playerId = UUID.randomUUID().toString()
-
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             roomCode = roomCode,
-                            playerId = playerId
+                            playerId = playerId // This now matches the DB
                         )
                     }
                 },

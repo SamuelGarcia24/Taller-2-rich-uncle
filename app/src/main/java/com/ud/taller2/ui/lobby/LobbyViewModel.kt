@@ -1,5 +1,6 @@
 package com.ud.taller2.ui.lobby
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ud.taller2.data.model.PlayerRoom
@@ -18,14 +19,21 @@ class LobbyViewModel : ViewModel() {
     fun loadRoom(roomCode: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            Log.d("LobbyViewModel", "Loading room: $roomCode")
 
             repository.listenToRoom(roomCode).collect { room ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        room = room,
-                        players = room?.players?.values?.toList() ?: emptyList()
-                    )
+                if (room != null) {
+                    Log.d("LobbyViewModel", "Room updated: status=${room.status}, players=${room.players.size}")
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            room = room,
+                            players = room.players.values.toList()
+                        )
+                    }
+                } else {
+                    Log.d("LobbyViewModel", "Room is null")
+                    _uiState.update { it.copy(isLoading = false, error = "Room not found") }
                 }
             }
         }
@@ -33,13 +41,20 @@ class LobbyViewModel : ViewModel() {
 
     fun setPlayerReady(roomCode: String, playerId: String, isReady: Boolean) {
         viewModelScope.launch {
-            repository.setPlayerReady(roomCode, playerId, isReady)
+            Log.d("LobbyViewModel", "Setting player $playerId ready: $isReady in room $roomCode")
+            try {
+                repository.setPlayerReady(roomCode, playerId, isReady)
+                Log.d("LobbyViewModel", "Successfully set player ready")
+            } catch (e: Exception) {
+                Log.e("LobbyViewModel", "Error setting player ready", e)
+                _uiState.update { it.copy(error = "Failed to update ready status") }
+            }
         }
     }
 
     fun startGame(roomCode: String) {
         viewModelScope.launch {
-            // Update room status to playing
+            Log.d("LobbyViewModel", "Starting game in room: $roomCode")
             repository.startGame(roomCode)
         }
     }
